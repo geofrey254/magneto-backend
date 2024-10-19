@@ -495,6 +495,164 @@ export interface PluginUsersPermissionsUser
   };
 }
 
+export interface ApiAssessmentAssessment extends Struct.CollectionTypeSchema {
+  collectionName: 'assessments';
+  info: {
+    singularName: 'assessment';
+    pluralName: 'assessments';
+    displayName: 'Assessment';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    title: Schema.Attribute.String;
+    description: Schema.Attribute.Text;
+    date: Schema.Attribute.DateTime;
+    total_marks: Schema.Attribute.Decimal;
+    exam_pdf: Schema.Attribute.Media<'files'>;
+    submission_deadline: Schema.Attribute.DateTime;
+    createdAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    publishedAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::assessment.assessment'
+    > &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiChapterChapter extends Struct.CollectionTypeSchema {
+  collectionName: 'chapters';
+  info: {
+    singularName: 'chapter';
+    pluralName: 'chapters';
+    displayName: 'Chapter';
+    description: '';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    title: Schema.Attribute.String;
+    contents: Schema.Attribute.Relation<'oneToMany', 'api::content.content'>;
+    class: Schema.Attribute.Relation<'oneToOne', 'api::class.class'>;
+    subject: Schema.Attribute.Relation<'oneToOne', 'api::subject.subject'>;
+    createdAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    publishedAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::chapter.chapter'
+    > &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiClassClass extends Struct.CollectionTypeSchema {
+  collectionName: 'classes';
+  info: {
+    singularName: 'class';
+    pluralName: 'classes';
+    displayName: 'Class';
+    description: '';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    name: Schema.Attribute.String;
+    description: Schema.Attribute.Text;
+    subjects: Schema.Attribute.Relation<'oneToMany', 'api::subject.subject'>;
+    chapter: Schema.Attribute.Relation<'oneToOne', 'api::chapter.chapter'>;
+    createdAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    publishedAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::class.class'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiContentContent extends Struct.CollectionTypeSchema {
+  collectionName: 'contents';
+  info: {
+    singularName: 'content';
+    pluralName: 'contents';
+    displayName: 'Content';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    title: Schema.Attribute.String;
+    notes: Schema.Attribute.Blocks;
+    content_video: Schema.Attribute.Media<'videos'>;
+    chapter: Schema.Attribute.Relation<'manyToOne', 'api::chapter.chapter'>;
+    createdAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    publishedAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::content.content'
+    > &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiSubjectSubject extends Struct.CollectionTypeSchema {
+  collectionName: 'subjects';
+  info: {
+    singularName: 'subject';
+    pluralName: 'subjects';
+    displayName: 'Subject';
+    description: '';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    name: Schema.Attribute.String;
+    description: Schema.Attribute.Text;
+    photo: Schema.Attribute.Media<'images'>;
+    classes: Schema.Attribute.Relation<'oneToMany', 'api::class.class'>;
+    chapter: Schema.Attribute.Relation<'oneToOne', 'api::chapter.chapter'>;
+    createdAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    publishedAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::subject.subject'
+    > &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface AdminPermission extends Struct.CollectionTypeSchema {
   collectionName: 'admin_permissions';
   info: {
@@ -877,6 +1035,11 @@ declare module '@strapi/strapi' {
       'plugin::users-permissions.permission': PluginUsersPermissionsPermission;
       'plugin::users-permissions.role': PluginUsersPermissionsRole;
       'plugin::users-permissions.user': PluginUsersPermissionsUser;
+      'api::assessment.assessment': ApiAssessmentAssessment;
+      'api::chapter.chapter': ApiChapterChapter;
+      'api::class.class': ApiClassClass;
+      'api::content.content': ApiContentContent;
+      'api::subject.subject': ApiSubjectSubject;
       'admin::permission': AdminPermission;
       'admin::user': AdminUser;
       'admin::role': AdminRole;
