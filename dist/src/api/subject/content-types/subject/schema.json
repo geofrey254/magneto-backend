@@ -36,6 +36,10 @@
             "relation": "oneToOne",
             "target": "api::chapter.chapter",
             "mappedBy": "subject"
+        },
+        "slug": {
+            "type": "uid",
+            "targetField": "name"
         }
     }
 }

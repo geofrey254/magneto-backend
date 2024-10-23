@@ -15,12 +15,6 @@
         "title": {
             "type": "string"
         },
-        "contents": {
-            "type": "relation",
-            "relation": "oneToMany",
-            "target": "api::content.content",
-            "mappedBy": "chapter"
-        },
         "class": {
             "type": "relation",
             "relation": "oneToOne",
@@ -32,6 +26,24 @@
             "relation": "oneToOne",
             "target": "api::subject.subject",
             "inversedBy": "chapter"
+        },
+        "description": {
+            "type": "text"
+        },
+        "content": {
+            "type": "blocks"
+        },
+        "content_video": {
+            "type": "media",
+            "multiple": false,
+            "required": false,
+            "allowedTypes": [
+                "videos"
+            ]
+        },
+        "slug": {
+            "type": "uid",
+            "targetField": "title"
         }
     }
 }
