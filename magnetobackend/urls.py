@@ -17,7 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from subject.urls import router as subject_router
+from lesson.urls import lesson as lesson_router
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('subject.urls'))
+    path('tinymce/', include('tinymce.urls')),
+    path('api/', include((subject_router.urls, 'core_api'), namespace='core_api')),
+    path('api/', include((lesson_router.urls, 'lesson_api'), namespace='lesson_api')),
+
 ]
