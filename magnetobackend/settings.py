@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-import environ
+import environ, os
 
 env = environ.Env()
 environ.Env.read_env()
@@ -32,6 +32,12 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -45,12 +51,32 @@ INSTALLED_APPS = [
     'class',
     'exam',
     'lesson',
-    'rest_framework',
+    'users',
+
     'corsheaders',
-    'tinymce'
+    'tinymce',
+    'django_filters',
+
+    'rest_framework',
+    "rest_framework.authtoken",
+    'dj_rest_auth',
+
+    # auth
+    "django.contrib.sites",
+    'allauth',
+    'allauth.account',
+    "dj_rest_auth.registration",
+
+
+
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+
+
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -58,14 +84,29 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    "corsheaders.middleware.CorsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': env('GOOGLE_CLIENT_ID'),
+            'secret': env('GOOGLE_CLIENT_SECRET'),
+            'key': ''
+        }
+    }
+}
+
 ROOT_URLCONF = 'magnetobackend.urls'
+
+CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:8000'
 ]
+
+SITE_ID = 1
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -131,12 +172,25 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
+    ]
+}
+
+REST_AUTH = {
+    'USE_JWT': True,
+    'JWT_AUTH_COOKIE': 'jwt-auth',
+}
 
 # tinymce
 TINYMCE_DEFAULT_CONFIG = {

@@ -14,7 +14,7 @@ class Subject(models.Model):
     image = models.ImageField(upload_to='images/subjects_upload', null=True)
     description = models.CharField(null=True, max_length=800, default="")
     slug = models.SlugField(unique=True, default="", null=True)
-    form = models.ManyToManyField(Classes)
+    form = models.ManyToManyField(Classes, related_name='subjects')
 
     def __str__(self):
         return self.title

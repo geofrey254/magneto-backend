@@ -8,8 +8,10 @@ class chapterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chapters
         fields = '__all__'
+        read_only_fields = ['id']
 
 class contentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Content
         fields = '__all__'
+        read_only_fields = ['id']
