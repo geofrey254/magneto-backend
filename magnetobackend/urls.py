@@ -26,8 +26,8 @@ from lesson.urls import lesson as lesson_router
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
-    path('dj-rest-auth/', include('dj_rest_auth.urls')),
-    path('dj_rest-auth/registration/', include('dj_rest_auth.registration.urls')),
+    path('api/auth/', include('dj_rest_auth.urls')),
+    path('api/auth/registration/', include('dj_rest_auth.registration.urls')),
     path('tinymce/', include('tinymce.urls')),
     path('api/auth/', include('users.urls')),
     path('api/', include((subject_router.urls, 'core_api'), namespace='core_api')),
