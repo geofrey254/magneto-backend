@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'exam',
     'lesson',
     'users',
+    'subscription',
 
     'corsheaders',
     'tinymce',
@@ -73,8 +74,22 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
 
+    # mpesa
+    'mpesa'
+
 
 ]
+
+# MPESA CONFIG
+MPESA_CONFIG = {
+'CONSUMER_KEY': env('CONSUMER_KEY'),
+'CONSUMER_SECRET': env('CONSUMER_SECRET'),
+'PASS_KEY': env('PASS_KEY'),
+'SAFARICOM_API': 'https://sandbox.safaricom.co.ke',
+'SHORT_CODE': '174379',
+'TILL_NUMBER': None,
+'TRANSACTION_TYPE': 'CustomerBuyGoodsOnline',
+}
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',

@@ -10,6 +10,10 @@ from rest_framework_simplejwt.views import (
 
 from subject.urls import router as subject_router
 from lesson.urls import lesson as lesson_router
+from subscription.urls import subs as subs_router
+
+from mpesa.urls import mpesa_urls
+
 
 
 urlpatterns = [
@@ -35,5 +39,10 @@ urlpatterns = [
     # API routes for subjects and lessons
     path('api/', include((subject_router.urls, 'core_api'), namespace='core_api')),
     path('api/', include((lesson_router.urls, 'lesson_api'), namespace='lesson_api')),
+    path('api/', include((subs_router.urls, 'subs_api'), namespace='subs_api')),
+
+    # mpesa
+    path('mpesa/', include(mpesa_urls)),
+
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
