@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 import environ, os
 
 env = environ.Env()
@@ -89,6 +90,13 @@ MIDDLEWARE = [
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
+        'SCOPE':[
+            'profile',
+            'email'
+        ],
+        'AUTH_PARAMS':{
+            'access_type':'online'
+        },
         'APP': {
             'client_id': env('GOOGLE_CLIENT_ID'),
             'secret': env('GOOGLE_CLIENT_SECRET'),
@@ -100,13 +108,18 @@ SOCIALACCOUNT_PROVIDERS = {
 ROOT_URLCONF = 'magnetobackend.urls'
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:8000'
+CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:3000',
+#     'http://127.0.0.1:3000',
+#     'http://127.0.0.1:8000'
+# ]
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Django default backend
+    'allauth.account.auth_backends.AuthenticationBackend',  # allauth backend for social login
 ]
 
-SITE_ID = 1
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -182,10 +195,19 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_FILE_PATH = BASE_DIR / 'emails'
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
+
+
+SITE_ID = 1
+SOCIALACCOUNT_LOGIN_ON_GET = True
+LOGIN_REDIRECT_URL = 'http://localhost:3000/'
+LOGOUT_REDIRECT_URL = 'http://localhost:3000/signin'
+GOOGLE_OAUTH_CALLBACK_URL = 'http://localhost:3000/auth/callback?code=AUTH_CODE'
+NEXT_JS_CALLBACK_URL = 'http://localhost:3000/auth/callback'
 
 # ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 # ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = 'http://localhost:8000/api/v1/dj-rest-auth/login/'
@@ -193,9 +215,7 @@ ACCOUNT_UNIQUE_EMAIL = True
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.TokenAuthentication",
-         "rest_framework.authentication.SessionAuthentication",
-
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
@@ -207,30 +227,59 @@ REST_AUTH = {
     'JWT_AUTH_COOKIE': 'jwt-auth',
 }
 
-# tinymce
-TINYMCE_DEFAULT_CONFIG = {
-    'height': 360,
-    'width': 800,
-    'menubar': 'file edit view insert format tools table help',
-    'plugins': 'advlist autolink lists link image charmap print preview hr anchor pagebreak',
-    'toolbar': 'undo redo | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent',
+# Enable social login in dj-rest-auth
+REST_AUTH_REGISTER_SERIALIZERS = {
+    'REGISTER_SERIALIZER': 'dj_rest_auth.registration.serializers.RegisterSerializer',
 }
 
 
-# TINYMCE_DEFAULT_CONFIG = {
-#     "theme":"silver",
-#     "height": "320px",
-#     "width": "960px",
-#     "menubar": "file edit view insert format tools table help",
-#     "plugins": "advlist autolink lists link image charmap print preview anchor searchreplace visualblocks code "
-#     "fullscreen insertdatetime media table paste code help wordcount spellchecker",
-#     "toolbar": "undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft "
-#     "aligncenter alignright alignjustify | outdent indent |  numlist bullist checklist | forecolor "
-#     "backcolor casechange permanentpen formatpainter removeformat | pagebreak | charmap emoticons | "
-#     "fullscreen  preview save print | insertfile image media pageembed template link anchor codesample | "
-#     "a11ycheck ltr rtl | showcomments addcomment code",
-#     "custom_undo_redo_levels": 10,
-#     "language": "es_ES",  # To force a specific language instead of the Django current language.
-# }
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+}
+
+
+# tinymce
+TINYMCE_DEFAULT_CONFIG = {
+    'cleanup_on_startup': True,
+    'custom_undo_redo_levels': 20,
+    'selector': 'textarea',
+    'height': 360,
+    'width': 800,
+    'menubar': 'file edit view insert format tools table help',
+    'plugins': 'advlist autolink lists link image charmap print preview hr anchor pagebreak codesample math image media link',
+    'toolbar': 'undo redo | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media | code',
+    
+    # Enable file picker callback to open file upload dialog
+    'file_picker_callback': """
+        function(callback, value, meta) {
+            // Create a hidden file input element
+            var input = document.createElement('input');
+            input.setAttribute('type', 'file');
+            input.setAttribute('accept', (meta.filetype === 'image') ? 'image/*' : '*');
+            
+            // Trigger file selection dialog
+            input.onchange = function() {
+                var file = this.files[0];
+                var reader = new FileReader();
+                
+                // Read the file as a data URL
+                reader.onload = function() {
+                    // Pass the file URL to the callback
+                    callback(reader.result, { alt: file.name });
+                };
+                reader.readAsDataURL(file);
+            };
+            
+            input.click();
+        }
+    """,
+}
+
+
+
+
 TINYMCE_SPELLCHECKER = True
 TINYMCE_COMPRESSOR = False

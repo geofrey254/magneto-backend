@@ -5,6 +5,7 @@ from dj_rest_auth.views import LoginView, LogoutView, UserDetailsView
 from . import views
 
 
+
 urlpatterns = [
     # URLs will come here
     path("register/", RegisterView.as_view(), name="rest_register"),
