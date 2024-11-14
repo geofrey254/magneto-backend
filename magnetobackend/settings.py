@@ -75,21 +75,22 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
 
     # mpesa
-    'mpesa'
+    'django_daraja'
 
 
 ]
 
 # MPESA CONFIG
-MPESA_CONFIG = {
-'CONSUMER_KEY': env('CONSUMER_KEY'),
-'CONSUMER_SECRET': env('CONSUMER_SECRET'),
-'PASS_KEY': env('PASS_KEY'),
-'SAFARICOM_API': 'https://sandbox.safaricom.co.ke',
-'SHORT_CODE': '174379',
-'TILL_NUMBER': None,
-'TRANSACTION_TYPE': 'CustomerBuyGoodsOnline',
-}
+MPESA_ENVIRONMENT = 'sandbox'
+MPESA_CONSUMER_KEY = env('CONSUMER_KEY')
+MPESA_CONSUMER_SECRET = env('CONSUMER_SECRET')
+MPESA_SHORTCODE = '174379'
+MPESA_EXPRESS_SHORTCODE = '174379'
+MPESA_SHORTCODE_TYPE = 'paybill'
+MPESA_PASSKEY =  env('PASS_KEY')
+
+
+
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',

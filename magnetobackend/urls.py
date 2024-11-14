@@ -12,7 +12,6 @@ from subject.urls import router as subject_router
 from lesson.urls import lesson as lesson_router
 from subscription.urls import subs as subs_router
 
-from mpesa.urls import mpesa_urls
 
 
 
@@ -42,7 +41,7 @@ urlpatterns = [
     path('api/', include((subs_router.urls, 'subs_api'), namespace='subs_api')),
 
     # mpesa
-    path('mpesa/', include(mpesa_urls)),
+    path('', include('subscription.urls')),
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
