@@ -213,16 +213,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_FILE_PATH = BASE_DIR / 'emails'
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_USERNAME_REQUIRED = True
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_EMAIL_VERIFICATION = "none"
+
 
 
 SITE_ID = 1
 SOCIALACCOUNT_LOGIN_ON_GET = True
 LOGIN_REDIRECT_URL = 'http://localhost:3000/'
 LOGOUT_REDIRECT_URL = 'http://localhost:3000/signin'
-GOOGLE_OAUTH_CALLBACK_URL = 'http://localhost:3000/auth/callback?code=AUTH_CODE'
+GOOGLE_OAUTH_CALLBACK_URL = 'http://localhost:8000/user/dj-rest-auth/google/callback/'
 NEXT_JS_CALLBACK_URL = 'http://localhost:3000/auth/callback'
 
 # ACCOUNT_CONFIRM_EMAIL_ON_GET = True
@@ -232,16 +234,22 @@ NEXT_JS_CALLBACK_URL = 'http://localhost:3000/auth/callback'
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication'
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
     ],
 }
 
+REST_SESSION_LOGIN = False
 REST_AUTH = {
     'USE_JWT': True,
-    'JWT_AUTH_COOKIE': 'jwt-auth',
+    'JWT_AUTH_COOKIE':'jwt-access-token' ,          
+    'JWT_AUTH_REFRESH_COOKIE':'jwt-refresh-token',
+    "JWT_AUTH_HTTPONLY": False,
 }
+   
+JWT_AUTH_SECURE = True
 
 # Enable social login in dj-rest-auth
 REST_AUTH_REGISTER_SERIALIZERS = {

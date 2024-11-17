@@ -21,7 +21,7 @@ urlpatterns = [
     
     # Authentication endpoints
     path('accounts/', include('allauth.urls')),  # Django allauth endpoints
-    path('api/social/login', include('users.urls')), 
+    path('user/', include('users.urls')), 
     path('api/auth/', include('dj_rest_auth.urls')),  # Login/logout/password management
     path('api/auth/registration/', include('dj_rest_auth.registration.urls')),  # Registration endpoint
 

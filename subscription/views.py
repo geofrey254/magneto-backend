@@ -57,7 +57,7 @@ def submit_payment(request):
         amount = plan.price
         account_reference = f"Subscription_{plan.name}"
         transaction_desc = "Subscription Payment"
-        callback_url = 'https://your-callback-url.com/confirm-payment/'  # Replace with actual callback URL
+        callback_url = 'http://localhost:3000/subscription/callback'  # Replace with actual callback URL
 
         # Initiate STK Push
         response = cl.stk_push(phone_number, amount, account_reference, transaction_desc, callback_url)
