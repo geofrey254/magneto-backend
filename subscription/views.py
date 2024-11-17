@@ -41,60 +41,73 @@ class subscriptionViewset(viewsets.ModelViewSet):
 #         data = request.body
         
 #         return HttpResponse("STK Push in Django👋")
-@csrf_exempt
 @login_required
+def debug_login_status(request):
+    return JsonResponse({"user": request.user.username, "is_authenticated": request.user.is_authenticated})
+
+@csrf_exempt
 def submit_payment(request):
     if request.method == "POST":
-        data = json.loads(request.body)
-        plan_id = data.get("plan_id")
-        phone_number = data.get("phone_number")
+        try:
+            data = json.loads(request.body)
+            print("Received Data:", data)
+            
+            plan_id = data.get("plan_id")
+            phone_number = data.get("phone_number")
+            print(f"Plan ID: {plan_id}, Phone Number: {phone_number}")
 
-        # Get the subscription plan by id
-        plan = get_object_or_404(SubscriptionPlan, id=plan_id)
+            if not plan_id:
+                return JsonResponse({"error": "Invalid plan ID."}, status=400)
 
-        # Set up MpesaClient for the STK push
-        cl = MpesaClient()
-        amount = plan.price
-        account_reference = f"Subscription_{plan.name}"
-        transaction_desc = "Subscription Payment"
-        callback_url = 'http://localhost:3000/subscription/callback'  # Replace with actual callback URL
+            plan = get_object_or_404(SubscriptionPlan, id=plan_id)
+            print(f"Fetched Plan: {plan}")
 
-        # Initiate STK Push
-        response = cl.stk_push(phone_number, amount, account_reference, transaction_desc, callback_url)
+            cl = MpesaClient()
+            amount = plan.price
+            account_reference = f"Subscription_{plan.name}"
+            transaction_desc = "Subscription Payment"
+            callback_url = 'https://209d-41-90-40-205.ngrok-free.app/subscription/callback'
+            print("Initiating STK push...")
 
-        if hasattr(response, 'response_code') and response.response_code == "0":
-            # Calculate subscription duration based on plan
-            duration = {
-                'daily': timedelta(days=1),
-                'monthly': timedelta(days=30),
-                'yearly': timedelta(days=365),
-            }.get(plan.name, timedelta(days=1))
+            response = cl.stk_push(phone_number, amount, account_reference, transaction_desc, callback_url)
+            print("Mpesa Response:", response)
 
-            # Ensure the user is authenticated before creating a subscription
-            if request.user.is_authenticated:
-                # Create the subscription and set start and end dates
-                subscription = Subscription.objects.create(
-                    user=request.user,
-                    plan=plan,
-                    start_date=timezone.now(),
-                    end_date=timezone.now() + duration
-                )
+            if hasattr(response, 'response_code') and response.response_code == "0":
+                duration = {
+                    'daily': timedelta(days=1),
+                    'monthly': timedelta(days=30),
+                    'yearly': timedelta(days=365),
+                }.get(plan.name, timedelta(days=1))
+                print("Calculated Duration:", duration)
 
-                # Mark the session based on the subscription status (Active or Pending)
-                # Here, you could update the user's session status, for example:
-                request.session['is_subscribed'] = subscription.is_active()
+                if request.user.is_authenticated:
+                    subscription = Subscription.objects.create(
+                        user=request.user,
+                        plan=plan,
+                        start_date=timezone.now(),
+                        end_date=timezone.now() + duration
+                    )
+                    print("Created Subscription:", subscription)
 
-                return JsonResponse({"message": "Payment initiated. Awaiting confirmation."}, status=200)
+                    request.session['is_subscribed'] = subscription.is_active()
+
+                    return JsonResponse({"message": "Payment initiated. Awaiting confirmation."}, status=200)
+                else:
+                    print("User not authenticated.")
+                    return JsonResponse({"error": "User is not authenticated."}, status=403)
             else:
-                return JsonResponse({"error": "User is not authenticated."}, status=403)
-        else:
-            return JsonResponse({
-                "message": "Failed to initiate payment", 
-                "error": response.response_description or response.error_message
-            }, status=500)
+                error_message = response.response_description or response.error_message
+                print("STK Push Error:", error_message)
+                return JsonResponse({
+                    "message": "Failed to initiate payment", 
+                    "error": error_message
+                }, status=500)
+
+        except Exception as e:
+            print("Unexpected Error:", str(e))
+            return JsonResponse({"error": "An unexpected error occurred."}, status=500)
 
     return JsonResponse({"error": "Invalid request"}, status=400)
-
 
 @csrf_exempt
 def confirm_payment(request):

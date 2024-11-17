@@ -12,8 +12,9 @@ subs.register(r'subscription', subscriptionViewset, basename='subscription')
 urlpatterns = [
     # path("mpesa/submit/", views.submit_payment, name="submit_payment"),
     # path("mpesa/confirm/", views.confirm_payment, name="confirm_payment"),
-    # path("mpesa/check-transaction/", views.check_transaction, name="check_transaction"),
+    # path("mpesa/push/", views.push_stk, name="check_transaction"),
     # path("", include(subs.urls)),  # Include all URLs registered in the router
     path('mpesa/submit/', views.submit_payment, name='submit_payment'),
     path('mpesa/confirm_payment/', views.confirm_payment, name='confirm_payment'),
+    path('check_login', views.debug_login_status, name='check_login'),
 ]
