@@ -21,35 +21,35 @@ class GoogleLogin(SocialLoginView):
     client_class = OAuth2Client
 
 
-class GoogleLoginCallback(APIView):
-    def get(self, request, *args, **kwargs):
-        code = request.GET.get("code")
+# class GoogleLoginCallback(APIView):
+#     def get(self, request, *args, **kwargs):
+#         code = request.GET.get("code")
 
-        if code is None:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+#         if code is None:
+#             return Response(status=status.HTTP_400_BAD_REQUEST)
         
         
-        token_endpoint_url = urljoin("http://localhost:8000", reverse("google_login"))
-        response = requests.post(url=token_endpoint_url, data={"code": code})
+#         token_endpoint_url = urljoin("http://localhost:8000", reverse("google_login"))
+#         response = requests.post(url=token_endpoint_url, data={"code": code})
 
-        if response.status_code != 200:
-            return Response({"error": "Failed to exchange code for tokens"}, status=status.HTTP_400_BAD_REQUEST)
+#         if response.status_code != 200:
+#             return Response({"error": "Failed to exchange code for tokens"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Extract tokens from the response
-        tokens = response.json()
-        access_token = tokens.get("access")
-        refresh_token = tokens.get("refresh")
+#         # Extract tokens from the response
+#         tokens = response.json()
+#         access_token = tokens.get("access")
+#         refresh_token = tokens.get("refresh")
 
-        if not access_token or not refresh_token:
-            return Response({"error": "Failed to retrieve tokens"}, status=status.HTTP_400_BAD_REQUEST)
+#         if not access_token or not refresh_token:
+#             return Response({"error": "Failed to retrieve tokens"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Construct the frontend redirect URL
-        frontend_url = "http://localhost:3000"  # Update with your actual frontend domain in production
-        query_params = {
-            "access": access_token,
-            "refresh": refresh_token,
-        }
-        redirect_url = f"{frontend_url}?{urlencode(query_params)}"
+#         # Construct the frontend redirect URL
+#         frontend_url = "http://localhost:3000"  # Update with your actual frontend domain in production
+#         query_params = {
+#             "access": access_token,
+#             "refresh": refresh_token,
+#         }
+#         redirect_url = f"{frontend_url}?{urlencode(query_params)}"
 
-        # Redirect the user to the frontend with tokens in the query parameters
-        return redirect(redirect_url)
+#         # Redirect the user to the frontend with tokens in the query parameters
+#         return redirect(redirect_url)

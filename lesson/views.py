@@ -4,6 +4,7 @@ from .serializers import chapterSerializer, contentSerializer
 from .models import Chapters, Content
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import ContentFilter
+from rest_framework.pagination import PageNumberPagination
 
 
 
