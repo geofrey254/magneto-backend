@@ -267,10 +267,15 @@ REST_FRAMEWORK = {
 REST_SESSION_LOGIN = False
 REST_AUTH = {
     'USE_JWT': True,
-    'JWT_AUTH_COOKIE':'jwt-access-token' ,          
-    'JWT_AUTH_REFRESH_COOKIE':'jwt-refresh-token',
-    "JWT_AUTH_HTTPONLY": False,
+    'JWT_AUTH_COOKIE': 'jwt-access-token',
+    'JWT_AUTH_REFRESH_COOKIE': 'jwt-refresh-token',
+    'JWT_AUTH_COOKIE_HTTPONLY': True,
+    'JWT_AUTH_REFRESH_COOKIE_HTTPONLY': True,
+    'JWT_AUTH_COOKIE_SECURE': True,  
+    'JWT_AUTH_REFRESH_COOKIE_SECURE': True, 
+    'JWT_AUTH_COOKIE_SAMESITE': 'Strict',  
 }
+
    
 JWT_AUTH_SECURE = True
 
@@ -323,6 +328,21 @@ TINYMCE_DEFAULT_CONFIG = {
             input.click();
         }
     """,
+     "forced_root_block": False,  # Prevent wrapping everything in <p>
+    "force_br_newlines": True,  # Convert line breaks to <br>
+    "force_p_newlines": False,  # Don't force <p> for new lines
+    "valid_elements": (
+        "a[href|target=_blank],"
+        "strong/b,"
+        "em/i,"
+        "ul,ol,li,"
+        "br,"
+        "p"
+    ),  # Allow only essential elements
+    "valid_styles": {},  # Remove all inline styles
+    "remove_linebreaks": False,  # Keep line breaks
+    "convert_urls": False,  # Avoid automatic URL conversion
+    "content_style": "",  # Keep clean styles
 }
 
 
