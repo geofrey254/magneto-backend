@@ -245,7 +245,7 @@ SITE_ID = 1
 SOCIALACCOUNT_LOGIN_ON_GET = True
 LOGIN_REDIRECT_URL = 'http://localhost:3000/'
 LOGOUT_REDIRECT_URL = 'http://localhost:3000/signin'
-GOOGLE_OAUTH_CALLBACK_URL = 'http://localhost:8000/user/dj-rest-auth/google/callback/'
+GOOGLE_OAUTH_CALLBACK_URL = 'http://localhost:8000/magneto/google/callback/'
 NEXT_JS_CALLBACK_URL = 'http://localhost:3000/auth/callback'
 
 # ACCOUNT_CONFIRM_EMAIL_ON_GET = True
@@ -284,6 +284,9 @@ REST_AUTH_REGISTER_SERIALIZERS = {
     'REGISTER_SERIALIZER': 'dj_rest_auth.registration.serializers.RegisterSerializer',
 }
 
+REST_AUTH_SOCIAL_SERIALIZERS = {
+    "SOCIAL_LOGIN_SERIALIZER": "dj_rest_auth.social_serializers.SocialLoginSerializer",
+}
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
