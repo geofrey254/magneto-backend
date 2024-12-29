@@ -3,7 +3,7 @@ from dj_rest_auth.registration.views import RegisterView
 from dj_rest_auth.views import LoginView, LogoutView, UserDetailsView
 
 from . import views
-from .views import GoogleLogin, GoogleLoginCallback
+from .views import GoogleLogin, GoogleLoginCallback, save_user
 
 
 
@@ -16,4 +16,5 @@ urlpatterns = [
         GoogleLoginCallback.as_view(),
         name="google_callback",
     ),
+    path('save_user/', save_user),
 ]
