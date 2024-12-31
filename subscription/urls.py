@@ -10,6 +10,6 @@ subs.register(r'subscription', subscriptionViewset, basename='subscription')
 
 urlpatterns = [
    
-    path('submit/', views.submit_payment, name='submit_payment'),
+    path('submit/<int:plan_id>/', views.submit_payment, name='submit_payment'),
     path('confirm_payment/', views.confirm_payment, name='confirm_payment'),
 ]
