@@ -1,38 +1,33 @@
-from dj_rest_auth.registration.views import SocialLoginView
-from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
-from allauth.socialaccount.providers.oauth2.client import OAuth2Client
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.shortcuts import redirect
-from django.conf import settings
-from urllib.parse import urlencode
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view
-from django.contrib.auth.models import User
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework.permissions import AllowAny
+from google.auth.transport import requests
+from google.oauth2 import id_token
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth.models import User
 
+class GoogleLoginVerifyView(APIView):
+    permission_classes = [AllowAny]
 
+    def post(self, request):
+        id_token_str = request.data.get('id_token')
 
-class GoogleLogin(SocialLoginView):
-    adapter_class = GoogleOAuth2Adapter
-    callback_url = settings.GOOGLE_OAUTH_CALLBACK_URL
-    client_class = OAuth2Client
+        if not id_token_str:
+            return Response({"error": "No ID token provided."}, status=400)
 
+        try:
+            idinfo = id_token.verify_oauth2_token(id_token_str, requests.Request())
 
-class GoogleLoginCallback(APIView):
-    def get(self, request, *args, **kwargs):
-        
-        user = request.user
+            # Get user information
+            email = idinfo['email']
+            user, _ = User.objects.get_or_create(username=email, email=email)
 
-        refresh = RefreshToken.for_user(user)
-        jwt_access = str(refresh.access_token)
-        jwt_refresh = str(refresh)
-
-        frontend_url = "http://localhost:3000"
-        query_params = {
-            "access": jwt_access,
-            "refresh": jwt_refresh,
-        }
-        redirect_url = f"{frontend_url}?{urlencode(query_params)}"
-
-        return redirect(redirect_url)
+            # Generate JWT for the user
+            refresh = RefreshToken.for_user(user)
+            print(refresh)
+            return Response({
+                'access': str(refresh.access_token),
+                'refresh': str(refresh),
+            })
+        except ValueError:
+            return Response({"error": "Invalid token."}, status=400)

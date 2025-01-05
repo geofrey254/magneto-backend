@@ -14,6 +14,8 @@ from datetime import timedelta
 from django.utils import timezone
 from django.conf import settings
 import requests
+from django.contrib.auth.models import User
+
 
 class subscriptionPlanViewset(viewsets.ModelViewSet):
     queryset = SubscriptionPlan.objects.all()
@@ -26,22 +28,24 @@ class subscriptionViewset(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     lookup_field = 'plan'
 
-@csrf_exempt
-def submit_payment(request, plan_id):
-     if request.method == "POST":
+@permission_classes([IsAuthenticated])  
+def submit_payment(request, plan_id):    
+    if request.method == "POST":
+        
         data = json.loads(request.body)
         amount = int(data.get("amount")) * 100
         email = data.get("email")
+        
         plan = get_object_or_404(SubscriptionPlan, id=plan_id)
-        user = request.user
+        user = data.get("user")
         headers = {
             "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
             "Content-Type": "application/json",
         }
         payload = {
-            "email": user.email,
+            "email": email,
             "amount": amount,
-            "metadata": {"plan_id": plan.id},
+            "metadata": {"plan_id": plan.id, "user": email},
             "callback_url": "http://localhost:3000/subscription/success",
         }
         url = "https://api.paystack.co/transaction/initialize"
@@ -49,13 +53,8 @@ def submit_payment(request, plan_id):
         return JsonResponse(response.json())
 
 @csrf_exempt
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])  
 def confirm_payment(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({'status': 'error', 'message': 'User not authenticated'}, status=401)
-
-    if request.method == "GET":
+    if request.method == "POST":
         reference = request.GET.get("reference")
         if not reference:
             return JsonResponse({'status': 'error', 'message': 'Reference is required'}, status=400)
@@ -70,14 +69,22 @@ def confirm_payment(request):
 
         if response_data['status'] == True:
             plan_id = response_data['data']['metadata']['plan_id']
+            user_email = response_data['data']['customer']['email']
             try:
                 plan = SubscriptionPlan.objects.get(id=plan_id)
             except SubscriptionPlan.DoesNotExist:
                 return JsonResponse({'status': 'error', 'message': 'Subscription plan not found'}, status=404)
 
+            try:
+                # Get the user by email
+                user = User.objects.get(email=user_email)
+            except User.DoesNotExist:
+                return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)           
            
-            user = request.user  
-            Subscription.objects.create(plan=plan, user=user)
+            existing_subscription = Subscription.objects.filter(user=user, plan=plan).first()
+            if existing_subscription and existing_subscription.verified:
+                    return JsonResponse({'status': 'error', 'message': 'User already subscribed to this plan'}, status=400)   
+            Subscription.objects.create(plan=plan, user=user, verified=True)
 
             return JsonResponse({'status': 'success', 'message': 'Payment verified and subscription created'})
         else:

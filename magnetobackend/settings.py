@@ -88,15 +88,6 @@ INSTALLED_APPS = [
 
 ]
 
-# MPESA CONFIG
-MPESA_ENVIRONMENT = 'sandbox'
-MPESA_CONSUMER_KEY = env('CONSUMER_KEY')
-MPESA_CONSUMER_SECRET = env('CONSUMER_SECRET')
-MPESA_SHORTCODE = '174379'
-MPESA_EXPRESS_SHORTCODE = '174379'
-MPESA_SHORTCODE_TYPE = 'paybill'
-MPESA_PASSKEY =  env('PASS_KEY')
-
 
 
 
@@ -132,16 +123,20 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'magnetobackend.urls'
 
 CORS_ALLOW_CREDENTIALS = True
-# CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'http://192.168.100:3000',
-    'http://127.0.0.1:8000'
-]
+CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:3000',
+#     'http://127.0.0.1:3000',
+#     'http://192.168.100:3000',
+#     'http://127.0.0.1:8000'
+# ]
 CORS_ALLOW_HEADERS = [
     "content-type",
     "authorization",
+    'credentials',
+    'X-CSRFToken',
+    'Access-Control-Allow-Origin',
+    
     # Add other custom headers as needed
 ]
 
@@ -152,7 +147,7 @@ CORS_ALLOW_METHODS = [
     "PATCH",
     "DELETE",
 ]
-CSRF_TRUSTED_ORIGINS = ['https://*.127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['https://*.127.0.0.1', "http://localhost:3000", 'http://127.0.0.1:3000', 'http://192.168.100:3000']
 
 
 
@@ -247,6 +242,7 @@ ACCOUNT_EMAIL_VERIFICATION = "none"
 
 SITE_ID = 1
 SOCIALACCOUNT_LOGIN_ON_GET = True
+LOGIN_URL = 'http://localhost:3000/signin'
 LOGIN_REDIRECT_URL = 'http://localhost:3000/'
 LOGOUT_REDIRECT_URL = 'http://localhost:3000/signin'
 GOOGLE_OAUTH_CALLBACK_URL = 'http://localhost:8000/magneto/google/callback/'
@@ -259,13 +255,13 @@ NEXT_JS_CALLBACK_URL = 'http://localhost:3000/auth/callback'
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-        'dj_rest_auth.jwt_auth.JWTCookieAuthentication'
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     ],
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.AllowAny",
+        # "rest_framework.permissions.IsAuthenticated",
+        'rest_framework.permissions.AllowAny'
     ],
-    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    # 'PAGE_SIZE':9 #number of items per page
 } 
 
 REST_SESSION_LOGIN = False
@@ -297,6 +293,9 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
+    "ALGORITHM": "HS256",
+    "AUTH_HEADER_TYPES": ("Bearer",),
+
 }
 
 
