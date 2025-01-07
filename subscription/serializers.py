@@ -7,6 +7,7 @@ class subscriptionPlanSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class subscriptionSerializer(serializers.ModelSerializer): 
+    plan = serializers.CharField(source='plan.name', read_only=True)
     class Meta:
         model = Subscription
         fields = '__all__'

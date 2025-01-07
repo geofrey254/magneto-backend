@@ -15,7 +15,7 @@ from django.utils import timezone
 from django.conf import settings
 import requests
 from django.contrib.auth.models import User
-
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 class subscriptionPlanViewset(viewsets.ModelViewSet):
     queryset = SubscriptionPlan.objects.all()
@@ -27,10 +27,31 @@ class subscriptionViewset(viewsets.ModelViewSet):
     serializer_class = subscriptionSerializer
     filter_backends = [DjangoFilterBackend]
     lookup_field = 'plan'
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if not user:
+            raise PermissionDenied("User not authenticated")
+        return self.queryset.filter(user=user)
+
+    def list(self, request, *args, **kwargs):
+        # Serialize the QuerySet to JSON format
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        
+        # Log the serialized data to check the format
+        print(serializer.data)
+
+        # Return the serialized data correctly in JsonResponse
+        return JsonResponse({'subscriptions': serializer.data}) 
+
 
 @permission_classes([IsAuthenticated])  
 def submit_payment(request, plan_id):    
     if request.method == "POST":
+        print(request.headers)
         
         data = json.loads(request.body)
         amount = int(data.get("amount")) * 100
@@ -52,7 +73,6 @@ def submit_payment(request, plan_id):
         response = requests.post(url, headers=headers, json=payload)
         return JsonResponse(response.json())
 
-@csrf_exempt
 def confirm_payment(request):
     if request.method == "POST":
         reference = request.GET.get("reference")

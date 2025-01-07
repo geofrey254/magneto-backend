@@ -69,6 +69,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     "rest_framework.authtoken",
+    'rest_framework_simplejwt',
     'dj_rest_auth',
 
     # auth
@@ -136,6 +137,7 @@ CORS_ALLOW_HEADERS = [
     'credentials',
     'X-CSRFToken',
     'Access-Control-Allow-Origin',
+    'x-user-email',
     
     # Add other custom headers as needed
 ]
@@ -147,6 +149,8 @@ CORS_ALLOW_METHODS = [
     "PATCH",
     "DELETE",
 ]
+CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_HTTPONLY = False
 CSRF_TRUSTED_ORIGINS = ['https://*.127.0.0.1', "http://localhost:3000", 'http://127.0.0.1:3000', 'http://192.168.100:3000']
 
 
@@ -210,7 +214,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Nairobi'
 
 USE_I18N = True
 
