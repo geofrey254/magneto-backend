@@ -32,6 +32,7 @@ def run_flow(message: str) -> dict:
         "input_value": message,
         "output_type": "chat",
         "input_type": "chat",
+        "session_id": session_id
     }
 
     headers = {"Authorization": "Bearer " + APPLICATION_TOKEN, "Content-Type": "application/json"}
