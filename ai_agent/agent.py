@@ -19,13 +19,7 @@ APPLICATION_TOKEN = settings.API_TOKEN
 ENDPOINT = "magneto_tutor"  # The endpoint name of the flow
 
 
-def run_flow(message: str) -> dict:
-    """
-    Run a flow with a given message.
-
-    :param message: The message to send to the flow
-    :return: The JSON response from the flow
-    """
+def run_flow(message: str, session_id: str, ) -> dict:
     api_url = f"{BASE_API_URL}/lf/{LANGFLOW_ID}/api/v1/run/{ENDPOINT}"
 
     payload = {
@@ -35,8 +29,17 @@ def run_flow(message: str) -> dict:
         "session_id": session_id
     }
 
-    headers = {"Authorization": "Bearer " + APPLICATION_TOKEN, "Content-Type": "application/json"}
+    # if tweaks:
+    #     payload["tweaks"] = tweaks
+
+    headers = {"Authorization": "Bearer " + APPLICATION_TOKEN, "Content-Type": "application/json", "Session-ID": session_id,}
     response = requests.post(api_url, json=payload, headers=headers)
 
    
-    return response.json()
+    try:
+        response = requests.post(api_url, json=payload, headers=headers)
+        response.raise_for_status()  # Raise HTTPError for bad responses
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Error communicating with Langflow API: {e}")  # Log detailed error
+        raise

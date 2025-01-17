@@ -25,13 +25,13 @@ class Subscription(models.Model):
     plan = models.ForeignKey(SubscriptionPlan, on_delete=models.CASCADE)
     start_date = models.DateTimeField(auto_now_add=True)
     end_date = models.DateTimeField(null=True)
-    verified = models.BooleanField(default=False, null=True)
+    verified = models.BooleanField(default=False)
 
 
     class Meta:
         ordering = ['-start_date']
 
-    def save(self, *args, **kwargs):     
+    def save(self, *args, **kwargs):
         if not self.start_date:
             self.start_date = now()
 
@@ -39,11 +39,11 @@ class Subscription(models.Model):
             existing_subscription = Subscription.objects.filter(user=self.user, plan=self.plan, verified=True).first()  
 
             if existing_subscription:
-                return 
+                return
 
       
         if self.plan.duration:
-            self.end_date = self.start_date + timedelta(days=self.plan.duration)
+            self.end_date = self.start_date + timedelta(minutes=self.plan.duration)
         else:
           
             raise ValueError("The plan duration must be set and cannot be None or 0.")
@@ -51,7 +51,10 @@ class Subscription(models.Model):
         super().save(*args, **kwargs)
 
     def is_active(self):
+        if not self.verified:
+            return False
         return self.end_date > now()
     
     def __str__(self):
         return f"{self.user.username} - {self.plan.name} - {self.start_date} to {self.end_date}"
+    

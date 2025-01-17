@@ -39,6 +39,20 @@ class subscriptionViewset(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         # Serialize the QuerySet to JSON format
         queryset = self.get_queryset()
+        # Check if the subscriptions have expired and update the status if necessary
+        now = timezone.now()  # Get the current time
+        subscriptions_to_update = []  # Track subscriptions to update
+        
+        for subscription in queryset:
+            # Check if the subscription has expired
+            if subscription.end_date < now and subscription.is_active:
+                subscription.verified = False
+                subscriptions_to_update.append(subscription)
+        
+        # Save the updates to expired subscriptions
+        if subscriptions_to_update:
+            Subscription.objects.bulk_update(subscriptions_to_update, ['verified'])
+
         serializer = self.get_serializer(queryset, many=True)
         
         # Log the serialized data to check the format

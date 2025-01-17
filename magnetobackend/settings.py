@@ -151,7 +151,7 @@ CORS_ALLOW_METHODS = [
 ]
 CSRF_COOKIE_SECURE = False
 CSRF_COOKIE_HTTPONLY = False
-CSRF_TRUSTED_ORIGINS = ['https://*.127.0.0.1', "http://localhost:3000", 'http://127.0.0.1:3000', 'http://192.168.100:3000']
+CSRF_TRUSTED_ORIGINS = ['http://*.127.0.0.1', "http://localhost:3000", 'http://127.0.0.1:3000', 'http://192.168.100:3000']
 
 
 
@@ -252,10 +252,6 @@ LOGOUT_REDIRECT_URL = 'http://localhost:3000/signin'
 GOOGLE_OAUTH_CALLBACK_URL = 'http://localhost:8000/magneto/google/callback/'
 NEXT_JS_CALLBACK_URL = 'http://localhost:3000/auth/callback'
 
-# ACCOUNT_CONFIRM_EMAIL_ON_GET = True
-# ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = 'http://localhost:8000/api/v1/dj-rest-auth/login/'
-# LOGIN_URL = 'http://localhost:8000/api/v1/dj-rest-auth/login/'
-
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -293,8 +289,8 @@ REST_AUTH_SOCIAL_SERIALIZERS = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     "ALGORITHM": "HS256",
