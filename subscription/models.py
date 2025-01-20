@@ -43,7 +43,7 @@ class Subscription(models.Model):
 
       
         if self.plan.duration:
-            self.end_date = self.start_date + timedelta(minutes=self.plan.duration)
+            self.end_date = self.start_date + timedelta(days=self.plan.duration)
         else:
           
             raise ValueError("The plan duration must be set and cannot be None or 0.")
@@ -58,3 +58,12 @@ class Subscription(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.plan.name} - {self.start_date} to {self.end_date}"
     
+    def check_and_update_verification(self):
+        """Check if the subscription has expired, and set verified to False if so."""
+        if self.end_date and self.end_date <= now():
+            if self.verified:
+                self.verified = False
+                self.save()
+                print(f"Subscription for {self.user.username} has expired and is now marked as unverified.")
+        else:
+            print(f"Subscription for {self.user.username} is still active.")

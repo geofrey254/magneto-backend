@@ -17,10 +17,12 @@ import requests
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+
 class subscriptionPlanViewset(viewsets.ModelViewSet):
     queryset = SubscriptionPlan.objects.all()
     serializer_class = subscriptionPlanSerializer
     filter_backends = [DjangoFilterBackend]
+
 
 class subscriptionViewset(viewsets.ModelViewSet):
     queryset = Subscription.objects.all()
@@ -42,35 +44,36 @@ class subscriptionViewset(viewsets.ModelViewSet):
         # Check if the subscriptions have expired and update the status if necessary
         now = timezone.now()  # Get the current time
         subscriptions_to_update = []  # Track subscriptions to update
-        
+
         for subscription in queryset:
             # Check if the subscription has expired
             if subscription.end_date < now and subscription.is_active:
                 subscription.verified = False
                 subscriptions_to_update.append(subscription)
-        
+
         # Save the updates to expired subscriptions
         if subscriptions_to_update:
-            Subscription.objects.bulk_update(subscriptions_to_update, ['verified'])
+            Subscription.objects.bulk_update(
+                subscriptions_to_update, ['verified'])
 
         serializer = self.get_serializer(queryset, many=True)
-        
+
         # Log the serialized data to check the format
         print(serializer.data)
 
         # Return the serialized data correctly in JsonResponse
-        return JsonResponse({'subscriptions': serializer.data}) 
+        return JsonResponse({'subscriptions': serializer.data})
 
 
-@permission_classes([IsAuthenticated])  
-def submit_payment(request, plan_id):    
+@permission_classes([IsAuthenticated])
+def submit_payment(request, plan_id):
     if request.method == "POST":
         print(request.headers)
-        
+
         data = json.loads(request.body)
         amount = int(data.get("amount")) * 100
         email = data.get("email")
-        
+
         plan = get_object_or_404(SubscriptionPlan, id=plan_id)
         user = data.get("user")
         headers = {
@@ -86,6 +89,7 @@ def submit_payment(request, plan_id):
         url = "https://api.paystack.co/transaction/initialize"
         response = requests.post(url, headers=headers, json=payload)
         return JsonResponse(response.json())
+
 
 def confirm_payment(request):
     if request.method == "POST":
@@ -113,12 +117,15 @@ def confirm_payment(request):
                 # Get the user by email
                 user = User.objects.get(email=user_email)
             except User.DoesNotExist:
-                return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)           
-           
-            existing_subscription = Subscription.objects.filter(user=user, plan=plan).first()
+                return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+
+            existing_subscription = Subscription.objects.filter(
+                user=user, plan=plan).first()
             if existing_subscription and existing_subscription.verified:
-                    return JsonResponse({'status': 'error', 'message': 'User already subscribed to this plan'}, status=400)   
+                return JsonResponse({'status': 'error', 'message': 'User already subscribed to this plan'}, status=400)
             Subscription.objects.create(plan=plan, user=user, verified=True)
+            print(f"Created subscription for user: {
+                  user.email}, plan: {plan.name}")
 
             return JsonResponse({'status': 'success', 'message': 'Payment verified and subscription created'})
         else:

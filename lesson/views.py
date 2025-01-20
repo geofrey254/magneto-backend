@@ -5,7 +5,9 @@ from .models import Chapters, Content
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import ContentFilter
 from rest_framework.pagination import PageNumberPagination
-
+from rest_framework.permissions import IsAuthenticated
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 class chapterViewset(viewsets.ModelViewSet):
@@ -20,6 +22,7 @@ class chapterViewset(viewsets.ModelViewSet):
         if subject_slug:
             queryset = queryset.filter(subject__slug=subject_slug)
         return queryset
+
 
 class contentViewset(viewsets.ModelViewSet):
     queryset = Content.objects.all()
