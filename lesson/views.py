@@ -30,3 +30,4 @@ class contentViewset(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = ContentFilter
     lookup_field = 'title__slug'
+    
