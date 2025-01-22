@@ -67,3 +67,13 @@ class Subscription(models.Model):
                 print(f"Subscription for {self.user.username} has expired and is now marked as unverified.")
         else:
             print(f"Subscription for {self.user.username} is still active.")
+
+
+class PaymentHistory(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    amount_paid = models.IntegerField()
+    reference_code = models.CharField(max_length=100)
+    payment_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.amount_paid} - {self.reference_code}"

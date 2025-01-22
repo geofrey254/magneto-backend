@@ -7,8 +7,8 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
-from .serializers import subscriptionPlanSerializer, subscriptionSerializer
-from .models import Subscription, SubscriptionPlan
+from .serializers import subscriptionPlanSerializer, subscriptionSerializer, paymentHistorySerializer
+from .models import Subscription, SubscriptionPlan, PaymentHistory
 from django_filters.rest_framework import DjangoFilterBackend
 from datetime import timedelta
 from django.utils import timezone
@@ -124,9 +124,25 @@ def confirm_payment(request):
             if existing_subscription and existing_subscription.verified:
                 return JsonResponse({'status': 'error', 'message': 'User already subscribed to this plan'}, status=400)
             Subscription.objects.create(plan=plan, user=user, verified=True)
+            PaymentHistory.objects.create(
+                user=user, amount_paid=plan.amount, reference_code=reference, payment_date=timezone.now())
             print(f"Created subscription for user: {
                   user.email}, plan: {plan.name}")
 
             return JsonResponse({'status': 'success', 'message': 'Payment verified and subscription created'})
         else:
             return JsonResponse({'status': 'error', 'message': 'Payment verification failed'}, status=400)
+
+class paymentHistoryViewset(viewsets.ModelViewSet):
+    queryset = PaymentHistory.objects.all()
+    serializer_class = paymentHistorySerializer
+    filter_backends = [DjangoFilterBackend]
+    lookup_field = 'reference_code'
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if not user:
+            raise PermissionDenied("User not authenticated")
+        return self.queryset.filter(user=user)
+

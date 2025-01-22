@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Subscription, SubscriptionPlan
+from .models import Subscription, SubscriptionPlan, PaymentHistory
 
 class subscriptionPlanSerializer(serializers.ModelSerializer):
     class Meta:
@@ -13,3 +13,12 @@ class subscriptionSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['slug']
 
+class paymentHistorySerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+    class Meta:
+        model = PaymentHistory
+        fields = ['user','amount_paid', 'reference_code', 'payment_date']
+
+    def get_user(self, obj):
+        # Return the username of the user
+        return obj.user.username
