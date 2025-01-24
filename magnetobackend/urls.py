@@ -37,7 +37,7 @@ urlpatterns = [
 
     # API routes for subjects and lessons
     path('api/', include((subject_router.urls, 'core_api'), namespace='core_api')),
-    path('api/', include((lesson_router.urls, 'lesson_api'), namespace='lesson_api')),
+    path('api/', include(('lesson.urls'))),
     path('api/', include((subs_router.urls, 'subs_api'), namespace='subs_api')),
     path('api/', include('ai_agent.urls')),
 

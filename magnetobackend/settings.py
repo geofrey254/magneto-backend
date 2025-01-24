@@ -301,60 +301,45 @@ SIMPLE_JWT = {
 }
 
 
-# tinymce
+# myproject/settings.py
+
 TINYMCE_DEFAULT_CONFIG = {
-    'cleanup_on_startup': True,
-    'custom_undo_redo_levels': 20,
     'selector': 'textarea',
     'height': 360,
     'width': 800,
-    'menubar': 'file edit view insert format tools table help',
-    'plugins': 'advlist autolink lists link image charmap print preview hr anchor pagebreak codesample math image media link',
-    'toolbar': 'undo redo | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media | code',
-    
-    # Enable file picker callback to open file upload dialog
-    'file_picker_callback': """
-        function(callback, value, meta) {
-            // Create a hidden file input element
-            var input = document.createElement('input');
-            input.setAttribute('type', 'file');
-            input.setAttribute('accept', (meta.filetype === 'image') ? 'image/*' : '*');
-            
-            // Trigger file selection dialog
-            input.onchange = function() {
-                var file = this.files[0];
-                var reader = new FileReader();
-                
-                // Read the file as a data URL
-                reader.onload = function() {
-                    // Pass the file URL to the callback
-                    callback(reader.result, { alt: file.name });
+    'plugins': 'image, link, codesample',
+    'toolbar': 'undo redo | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | codesample',
+    'images_upload_url': '/api/tinymce/upload/',
+  'images_upload_handler': """
+        function (blobInfo, progress) {
+            return new Promise(function (resolve, reject) {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', '/api/tinymce/upload/');
+                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+                xhr.onload = function () {
+                    if (xhr.status < 200 || xhr.status >= 300) {
+                        reject('HTTP Error: ' + xhr.status);
+                        return;
+                    }
+                    try {
+                        const json = JSON.parse(xhr.responseText);
+                        resolve(json.location);
+                    } catch (e) {
+                        reject('Invalid JSON: ' + e.message);
+                    }
                 };
-                reader.readAsDataURL(file);
-            };
-            
-            input.click();
+
+                xhr.onerror = function () {
+                    reject('Network error');
+                };
+
+                const formData = new FormData();
+                formData.append('file', blobInfo.blob(), blobInfo.filename());
+                xhr.send(formData);
+            });
         }
     """,
-     "forced_root_block": False,  # Prevent wrapping everything in <p>
-    "force_br_newlines": True,  # Convert line breaks to <br>
-    "force_p_newlines": False,  # Don't force <p> for new lines
-    "valid_elements": (
-        "a[href|target=_blank],"
-        "strong/b,"
-        "em/i,"
-        "ul,ol,li,"
-        "br,"
-        "p"
-    ),  # Allow only essential elements
-    "valid_styles": {},  # Remove all inline styles
-    "remove_linebreaks": False,  # Keep line breaks
-    "convert_urls": False,  # Avoid automatic URL conversion
-    "content_style": "",  # Keep clean styles
+    'automatic_uploads': True,
+    'file_picker_types': 'image',
 }
-
-
-
-
-TINYMCE_SPELLCHECKER = True
-TINYMCE_COMPRESSOR = False
