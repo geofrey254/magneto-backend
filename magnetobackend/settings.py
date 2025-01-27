@@ -34,6 +34,50 @@ API_TOKEN = env('API_TOKEN')
 PAYSTACK_SECRET_KEY = env('PAYSTACK_SECRET_KEY')
 PAYSTACK_PUBLIC_KEY = env('PAYSTACK_PUBLIC_KEY')
 
+
+# AWS S3 Settings
+AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = 'magneto-django-s3'
+AWS_S3_REGION_NAME = 'us-east-1'  # Your bucket region_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+AWS_S3_FILE_OVERWRITE = False
+AWS_S3_VERIFY = True
+AWS_DEFAULT_ACL = None   
+AWS_QUERYSTRING_AUTH = False          # Disable query-string auth
+AWS_S3_SIGNATURE_VERSION = 's3v4'     # Required for some regions
+AWS_LOCATION = 'static'
+
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "access_key": AWS_ACCESS_KEY_ID,
+            "secret_key": AWS_SECRET_ACCESS_KEY,
+            "bucket_name": AWS_STORAGE_BUCKET_NAME,
+            "region_name": AWS_S3_REGION_NAME,
+            "default_acl": AWS_DEFAULT_ACL,
+            "querystring_auth": AWS_QUERYSTRING_AUTH,
+            "location":"media"
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "access_key": AWS_ACCESS_KEY_ID,
+            "secret_key": AWS_SECRET_ACCESS_KEY,
+            "bucket_name": AWS_STORAGE_BUCKET_NAME,
+            "region_name": AWS_S3_REGION_NAME,
+            "default_acl": AWS_DEFAULT_ACL,
+            "querystring_auth": AWS_QUERYSTRING_AUTH,
+            "location": AWS_LOCATION,
+        },
+    },
+}
+
+STATIC_URL = "https://magnetolearnbucket.s3.amazonaws.com/static/"
+MEDIA_URL = "https://magnetolearnbucket.s3.amazonaws.com/media/"
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -62,6 +106,7 @@ INSTALLED_APPS = [
     'users',
     'subscription',
     'ai_agent',
+    'storages',
 
     'corsheaders',
     'tinymce',
@@ -93,7 +138,7 @@ INSTALLED_APPS = [
 
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -221,11 +266,13 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
-MEDIA_URL = '/media/'
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{AWS_LOCATION}/"
+STATIC_ROOT = os.path.join(BASE_DIR, 'static') 
+
+# Media files (uploads)
+MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
@@ -241,6 +288,7 @@ ACCOUNT_USERNAME_REQUIRED = True
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = "none"
+AWS_LOCATION = 'static' 
 
 
 
@@ -251,6 +299,18 @@ LOGIN_REDIRECT_URL = 'http://localhost:3000/'
 LOGOUT_REDIRECT_URL = 'http://localhost:3000/signin'
 GOOGLE_OAUTH_CALLBACK_URL = 'http://localhost:8000/magneto/google/callback/'
 NEXT_JS_CALLBACK_URL = 'http://localhost:3000/auth/callback'
+
+# REDIS SETUP
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": env('REDIS_URL'),  # From Redis Cloud
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "SSL": False,  # Enable if your Redis Cloud instance uses SSL
+        }
+    }
+}
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -263,7 +323,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny'
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 3,
+    'PAGE_SIZE': 6,
 } 
 
 REST_SESSION_LOGIN = False

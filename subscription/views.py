@@ -16,12 +16,21 @@ from django.conf import settings
 import requests
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.authentication import JWTAuthentication
-
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 
 class subscriptionPlanViewset(viewsets.ModelViewSet):
     queryset = SubscriptionPlan.objects.all()
     serializer_class = subscriptionPlanSerializer
     filter_backends = [DjangoFilterBackend]
+
+    @method_decorator(cache_page(60 * 15))  # Cache list action
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @method_decorator(cache_page(60 * 15))  # Cache retrieve action
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
 
 
 class subscriptionViewset(viewsets.ModelViewSet):
@@ -37,7 +46,8 @@ class subscriptionViewset(viewsets.ModelViewSet):
         if not user:
             raise PermissionDenied("User not authenticated")
         return self.queryset.filter(user=user)
-
+    
+    @method_decorator(cache_page(60 * 15))
     def list(self, request, *args, **kwargs):
         # Serialize the QuerySet to JSON format
         queryset = self.get_queryset()
@@ -139,6 +149,14 @@ class paymentHistoryViewset(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     lookup_field = 'reference_code'
     permission_classes = [IsAuthenticated]
+
+    @method_decorator(cache_page(60 * 15))  # Cache list action
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @method_decorator(cache_page(60 * 15))  # Cache retrieve action
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
 
     def get_queryset(self):
         user = self.request.user
