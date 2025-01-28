@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import render
 from rest_framework import viewsets
 from .serializers import chapterSerializer, contentSerializer
@@ -14,6 +15,7 @@ import os
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 
+
 class chapterViewset(viewsets.ModelViewSet):
     queryset = Chapters.objects.all()
     serializer_class = chapterSerializer
@@ -22,6 +24,12 @@ class chapterViewset(viewsets.ModelViewSet):
 
     @method_decorator(cache_page(60 * 15))  # Cache list action
     def list(self, request, *args, **kwargs):
+        search_query = self.request.query_params.get('search')
+        if search_query:
+            # Bypass pagination for search queries
+            queryset = self.filter_queryset(self.get_queryset())
+            serializer = self.get_serializer(queryset, many=True)
+            return JsonResponse(serializer.data, safe=False)
         return super().list(request, *args, **kwargs)
 
     @method_decorator(cache_page(60 * 15))  # Cache retrieve action
@@ -31,8 +39,15 @@ class chapterViewset(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         subject_slug = self.request.query_params.get('subject')
+        search_query = self.request.query_params.get('search')
         if subject_slug:
             queryset = queryset.filter(subject__slug=subject_slug)
+
+        if search_query:
+            queryset = queryset.filter(
+                Q(title__icontains=search_query) | 
+                Q(description__icontains=search_query)
+            )
         return queryset
 
 class contentViewset(viewsets.ModelViewSet):
